@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SolarDZ</string>
+    <string name="daily_kwh">Consommation (kWh/jour)</string>
+    <string name="calculate">Calculer</string>
+    <string name="autonomy">Autonomie (jours)</string>
+</resources>
