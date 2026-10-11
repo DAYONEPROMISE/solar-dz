@@ -29,8 +29,8 @@ jobs:
       - name: Surface test log on failure
         if: failure()
         run: |
-          grep -a -E "^(e:|FAILED|FAILURE|Execution failed|What went wrong|> Could not|> Task)" build-test.log | head -40 | cut -c1-600 | while IFS= read -r l; do echo "::error::$l"; done
-          grep -a -A3 "What went wrong:" build-test.log | head -20 | cut -c1-600 | while IFS= read -r l; do echo "::error::$l"; done
+          sed 's/\x1b\[[0-9;]*m//g' build-test.log > build-test.clean.log
+          grep -a -E "FAILED|Caused by|What went wrong|error:|e: " build-test.clean.log | head -30 | cut -c1-600 | while IFS= read -r l; do echo "::error::$l"; done
       - name: Lint
         run: |
           set -o pipefail
