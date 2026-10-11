@@ -1,5 +1,6 @@
 package dz.solardz
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -45,9 +46,11 @@ fun SolarDzApp() {
     var darkOverride by rememberSaveable { mutableStateOf<String?>(null) }
     var lang by rememberSaveable { mutableStateOf(UiLang.FR) }
     val useDark = darkOverride?.toBooleanStrictOrNull() ?: isSystemInDarkTheme()
-    val colorScheme = when {
-        useDark -> dynamicDarkColorScheme(context)
-        else -> dynamicLightColorScheme(context)
+    // Dynamic color needs Android 12+ (API 31); static M3 fallback below that.
+    val colorScheme = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        if (useDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+    } else {
+        if (useDark) darkColorScheme() else lightColorScheme()
     }
     MaterialTheme(colorScheme = colorScheme) {
         SolarDzHome(lang, { lang = it }, useDark, darkOverride, { darkOverride = it })
