@@ -23,12 +23,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 
 class MainActivity : ComponentActivity() {
@@ -39,24 +37,20 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-enum class UiLang(val tag: String) { FR("fr"), AR("ar") }
+enum class UiLang { FR, AR }
 
 @Composable
 fun SolarDzApp() {
     val context = LocalContext.current
-    var darkTheme by rememberSaveable { mutableStateOf<Boolean?>(null) }
+    var darkOverride by rememberSaveable { mutableStateOf<String?>(null) }
     var lang by rememberSaveable { mutableStateOf(UiLang.FR) }
-    val useDark = darkTheme ?: isSystemInDarkTheme()
+    val useDark = darkOverride?.toBooleanStrictOrNull() ?: isSystemInDarkTheme()
     val colorScheme = when {
         useDark -> dynamicDarkColorScheme(context)
         else -> dynamicLightColorScheme(context)
     }
-    CompositionLocalProvider(
-        LocalLayoutDirection provides if (lang == UiLang.AR) LayoutDirection.Rtl else LayoutDirection.Ltr
-    ) {
-        MaterialTheme(colorScheme = colorScheme) {
-            SolarDzHome(lang, { lang = it }, useDark, darkTheme, { darkTheme = it })
-        }
+    MaterialTheme(colorScheme = colorScheme) {
+        SolarDzHome(lang, { lang = it }, useDark, darkOverride, { darkOverride = it })
     }
 }
 
@@ -68,8 +62,8 @@ fun SolarDzHome(
     lang: UiLang,
     onLangChange: (UiLang) -> Unit,
     useDark: Boolean,
-    darkOverride: Boolean?,
-    onDarkChange: (Boolean?) -> Unit,
+    darkOverride: String?,
+    onDarkChange: (String?) -> Unit,
 ) {
     var dailyKwh by rememberSaveable { mutableStateOf("6.0") }
     var zone by rememberSaveable { mutableStateOf("Hauts Plateaux (Setif, Djelfa)") }
@@ -89,7 +83,7 @@ fun SolarDzHome(
                         Icon(Icons.Filled.Language, contentDescription = t(lang, "Langue FR/AR", "اللغة"))
                     }
                     IconButton(
-                        onClick = { onDarkChange(if (darkOverride == null) !useDark else null) },
+                        onClick = { onDarkChange(if (darkOverride == null) (!useDark).toString() else null) },
                         modifier = Modifier.size(48.dp)
                     ) {
                         Icon(
@@ -137,7 +131,7 @@ private fun InputPane(lang: UiLang, dailyKwh: String, onDailyKwh: (String) -> Un
             OutlinedTextField(value = zone, onValueChange = {}, readOnly = true, label = { Text(t(lang, "Zone wilaya", "منطقة الولاية")) }, trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) }, modifier = Modifier.menuAnchor().fillMaxWidth())
             ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 SizingEngine.ZONE_SUN_HOURS.forEach { (k, v) ->
-                    DropdownMenuItem(text = { Text("$k — ${v}h") }, onClick = { onZone(k); expanded = false }, contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding)
+                    DropdownMenuItem(text = { Text("$k — ${v}h") }, onClick = { onZone(k); expanded = false })
                 }
             }
         }
