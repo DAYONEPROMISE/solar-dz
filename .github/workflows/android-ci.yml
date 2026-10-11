@@ -23,11 +23,22 @@ jobs:
         with:
           gradle-version: "8.7"
       - name: Unit tests
-        run: gradle testDebugUnitTest --stacktrace
+        run: |
+          set -o pipefail
+          gradle testDebugUnitTest --stacktrace 2>&1 | tee build-test.log
+      - name: Surface test log on failure
+        if: failure()
+        run: |
+          grep -a -E "^(e:|FAILED|FAILURE|Execution failed|What went wrong|> Could not|> Task)" build-test.log | head -40 | cut -c1-600 | while IFS= read -r l; do echo "::error::$l"; done
+          grep -a -A3 "What went wrong:" build-test.log | head -20 | cut -c1-600 | while IFS= read -r l; do echo "::error::$l"; done
       - name: Lint
-        run: gradle lintDebug --stacktrace
+        run: |
+          set -o pipefail
+          gradle lintDebug --stacktrace 2>&1 | tee build-lint.log
       - name: Assemble debug APK
-        run: gradle assembleDebug --stacktrace
+        run: |
+          set -o pipefail
+          gradle assembleDebug --stacktrace 2>&1 | tee build-assemble.log
       - uses: actions/upload-artifact@v4
         with:
           name: solardz-debug-apk
