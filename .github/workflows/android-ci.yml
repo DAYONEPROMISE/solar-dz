@@ -35,6 +35,11 @@ jobs:
         run: |
           set -o pipefail
           gradle lintDebug --stacktrace 2>&1 | tee build-lint.log
+      - name: Surface lint log on failure
+        if: failure()
+        run: |
+          sed 's/\x1b\[[0-9;]*m//g' build-lint.log > build-lint.clean.log
+          grep -a -E "Error|FAILED|Caused by|What went wrong" build-lint.clean.log | head -30 | cut -c1-600 | while IFS= read -r l; do echo "::error::$l"; done
       - name: Assemble debug APK
         run: |
           set -o pipefail
