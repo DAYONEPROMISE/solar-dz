@@ -20,6 +20,8 @@ jobs:
           yes | sdkmanager --licenses > /dev/null || true
           sdkmanager --install "platforms;android-34" "build-tools;34.0.0" "platform-tools" || true
       - uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: "8.7"
       - name: Lint + unit tests + assembleDebug
         run: gradle lint testDebugUnitTest assembleDebug --stacktrace
       - uses: actions/upload-artifact@v4
