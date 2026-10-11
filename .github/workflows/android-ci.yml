@@ -44,7 +44,15 @@ jobs:
         run: |
           set -o pipefail
           gradle assembleDebug --stacktrace 2>&1 | tee build-assemble.log
+      - name: Assemble release APK (unsigned)
+        run: |
+          set -o pipefail
+          gradle assembleRelease --stacktrace 2>&1 | tee build-assemble-release.log
       - uses: actions/upload-artifact@v4
         with:
           name: solardz-debug-apk
           path: app/build/outputs/apk/debug/*.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: solardz-release-apk
+          path: app/build/outputs/apk/release/*.apk
